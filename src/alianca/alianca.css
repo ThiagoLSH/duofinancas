@@ -1,0 +1,115 @@
+/* DuoFinanças — Aliança design system
+ * Drop this into your src/ folder and import once from main.jsx
+ * Scoped to .alianca-root so it won't fight your existing styles. */
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+.alianca-root {
+  --al-bg: #F4F5F9;
+  --al-bg-2: #ECEEF5;
+  --al-paper: #FFFFFF;
+  --al-ink: #0B0F1F;
+  --al-ink-soft: #45506A;
+  --al-ink-mute: #8892A9;
+  --al-line: #E5E8EF;
+  --al-line-strong: #D2D6E1;
+  --al-indigo: #2D2D8F;
+  --al-indigo-deep: #1F1F6E;
+  --al-indigo-soft: #E8E8F8;
+  --al-amber: #E5A53C;
+  --al-amber-soft: #FCEED1;
+  --al-green: #1D8F6A;
+  --al-green-soft: #D9F0E5;
+  --al-red: #C03A4C;
+
+  /* Re-expose with the short names the components use */
+  --bg: var(--al-bg);
+  --bg-2: var(--al-bg-2);
+  --paper: var(--al-paper);
+  --ink: var(--al-ink);
+  --ink-soft: var(--al-ink-soft);
+  --ink-mute: var(--al-ink-mute);
+  --line: var(--al-line);
+  --line-strong: var(--al-line-strong);
+  --indigo: var(--al-indigo);
+  --indigo-deep: var(--al-indigo-deep);
+  --indigo-soft: var(--al-indigo-soft);
+  --amber: var(--al-amber);
+  --amber-soft: var(--al-amber-soft);
+  --green: var(--al-green);
+  --green-soft: var(--al-green-soft);
+  --red: var(--al-red);
+
+  font-family: 'Sora', 'Inter', system-ui, sans-serif;
+  color: var(--al-ink);
+  background: var(--al-bg);
+  width: 100%;
+  height: 100%;
+  letter-spacing: -0.01em;
+}
+
+.alianca-root *,
+.alianca-root *::before,
+.alianca-root *::after { box-sizing: border-box; }
+
+.alianca-root .tnum { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+
+.alianca-root .num {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+}
+
+.alianca-root .card {
+  background: var(--al-paper);
+  border: 1px solid var(--al-line);
+  border-radius: 16px;
+}
+.alianca-root .card-tight { border-radius: 12px; }
+
+.alianca-root .chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 500;
+  padding: 3px 9px; border-radius: 6px;
+  background: var(--al-bg-2); color: var(--al-ink-soft);
+}
+.alianca-root .chip-success { background: var(--al-green-soft); color: var(--al-green); }
+.alianca-root .chip-amber { background: var(--al-amber-soft); color: #A4751E; }
+.alianca-root .chip-indigo { background: var(--al-indigo-soft); color: var(--al-indigo); }
+
+.alianca-root .btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  border: 1px solid transparent; transition: all .12s;
+  font-family: inherit;
+}
+.alianca-root .btn-primary { background: var(--al-ink); color: #fff; }
+.alianca-root .btn-primary:hover { background: var(--al-indigo); }
+.alianca-root .btn-indigo { background: var(--al-indigo); color: #fff; }
+.alianca-root .btn-ghost { background: transparent; color: var(--al-ink); border-color: var(--al-line-strong); }
+.alianca-root .btn-ghost:hover { background: var(--al-bg-2); }
+
+.alianca-root .navitem {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: 10px;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  color: var(--al-ink-soft); transition: all .12s;
+}
+.alianca-root .navitem.active { background: var(--al-ink); color: #fff; }
+.alianca-root .navitem:hover:not(.active) { background: var(--al-bg-2); color: var(--al-ink); }
+.alianca-root .navicon {
+  width: 18px; height: 18px; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+}
+
+.alianca-root .input {
+  width: 100%; padding: 11px 14px; border-radius: 10px;
+  background: var(--al-paper); border: 1px solid var(--al-line-strong);
+  font-family: inherit; font-size: 14px; color: var(--al-ink);
+}
+.alianca-root .input:focus { outline: none; border-color: var(--al-indigo); }
+
+.alianca-root .divider { height: 1px; background: var(--al-line); }

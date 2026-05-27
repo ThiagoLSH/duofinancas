@@ -41,3 +41,7 @@ Thumbs.db
 
 # Vite
 *.local
+
+# Prototype / reference directories
+Duofinan_as/
+alianca-auth-only/
