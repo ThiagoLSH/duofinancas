@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { Header } from '../components/Layout/Header'
 import { Welcome } from '../components/Steps/Welcome'
 import { AppPage } from './AppPage'
 import { Toast } from '../components/UI/Toast'
@@ -67,12 +66,9 @@ export const PlannerPage = () => {
   if (AliancaStep) return <><AliancaStep /><Toast /></>
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950">
-      <Header />
-      <main className="flex-1 overflow-y-auto">
-        <Welcome />
-      </main>
+    <>
+      <Welcome />
       <Toast />
-    </div>
+    </>
   )
 }

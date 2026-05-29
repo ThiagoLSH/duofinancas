@@ -1,22 +1,15 @@
-import { User, Users, TrendingUp, Shield, Target } from 'lucide-react'
-import { Button } from '../UI/Button'
 import { usePlan } from '../../hooks/usePlan'
 import { useFinanceContext } from '../../context/FinanceContext'
 import { useAuthContext } from '../../context/AuthContext'
 import { useState } from 'react'
-
-const FeatureBadge = ({ icon, text }) => (
-  <div className="flex items-center gap-2 text-sm text-slate-400">
-    <span className="text-emerald-400">{icon}</span>
-    {text}
-  </div>
-)
 
 export const Welcome = () => {
   const { createPlan } = usePlan()
   const { setStep, setLoading } = useFinanceContext()
   const { profile } = useAuthContext()
   const [selecting, setSelecting] = useState(null)
+
+  const firstName = profile?.full_name?.split(' ')[0] || ''
 
   const handleSelect = async (type) => {
     setSelecting(type)
@@ -28,95 +21,97 @@ export const Welcome = () => {
   }
 
   return (
-    <div className="flex flex-col items-center text-center max-w-2xl mx-auto px-4 py-12 space-y-10 animate-fade-in">
-      {/* Hero */}
-      <div className="space-y-4">
-        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 text-emerald-400 text-sm font-medium">
-          ✨ Planejamento financeiro simplificado
+    <div className="alianca-root" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ maxWidth: 560, width: '100%' }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--indigo)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18 }}>D</div>
+          <div style={{ fontWeight: 700, fontSize: 17, letterSpacing: '-0.02em', color: 'var(--ink)' }}>DuoFinanças</div>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight">
-          Bem-vindo{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''}!
-        </h1>
-        <p className="text-xl text-slate-400 leading-relaxed">
-          Suas finanças em sintonia — escolha seu perfil para começar
+
+        {/* Hero */}
+        <div style={{ marginBottom: 36 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--indigo-soft)', color: 'var(--indigo)', fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 99, marginBottom: 16 }}>
+            ✨ Suas finanças em sintonia
+          </div>
+          <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--ink)', lineHeight: 1.15, margin: 0 }}>
+            Bem-vindo{firstName ? `, ${firstName}` : ''}!
+          </h1>
+          <p style={{ fontSize: 15, color: 'var(--ink-soft)', marginTop: 10, lineHeight: 1.6 }}>
+            Escolha seu perfil para começar o planejamento.
+          </p>
+        </div>
+
+        {/* Profile Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 28 }}>
+          {/* Solo */}
+          <button
+            onClick={() => handleSelect('single')}
+            disabled={!!selecting}
+            style={{
+              padding: 22, borderRadius: 16, border: '1px solid var(--line)',
+              background: selecting === 'single' ? 'var(--indigo-soft)' : 'var(--paper)',
+              cursor: 'pointer', textAlign: 'left', transition: 'all .15s',
+              opacity: selecting && selecting !== 'single' ? 0.5 : 1,
+            }}
+          >
+            <div style={{ fontSize: 28, marginBottom: 10 }}>👤</div>
+            <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 6 }}>Solteiro(a)</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.5, marginBottom: 12 }}>Planejamento individual — controle total das suas finanças pessoais</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {['Orçamento pessoal', 'Metas individuais', 'Simulador de cenários'].map(f => (
+                <div key={f} style={{ fontSize: 11, color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ fontWeight: 700 }}>✓</span> {f}
+                </div>
+              ))}
+            </div>
+            {selecting === 'single' && (
+              <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
+                <div style={{ width: 18, height: 18, borderRadius: 99, border: '2px solid var(--indigo)', borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
+              </div>
+            )}
+          </button>
+
+          {/* Couple */}
+          <button
+            onClick={() => handleSelect('couple')}
+            disabled={!!selecting}
+            style={{
+              padding: 22, borderRadius: 16, border: '2px solid var(--indigo)',
+              background: selecting === 'couple' ? 'var(--indigo-soft)' : 'var(--paper)',
+              cursor: 'pointer', textAlign: 'left', transition: 'all .15s', position: 'relative',
+              opacity: selecting && selecting !== 'couple' ? 0.5 : 1,
+            }}
+          >
+            <div style={{ position: 'absolute', top: 12, right: 12, background: 'var(--indigo)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99 }}>
+              CASAL
+            </div>
+            <div style={{ fontSize: 28, marginBottom: 10 }}>👫</div>
+            <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 6 }}>Casal</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.5, marginBottom: 12 }}>Planejamento a dois — visão conjunta e gestão colaborativa</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {['Finanças do casal', 'Divisão de despesas', 'Sync em tempo real'].map(f => (
+                <div key={f} style={{ fontSize: 11, color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ fontWeight: 700 }}>✓</span> {f}
+                </div>
+              ))}
+            </div>
+            {selecting === 'couple' && (
+              <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
+                <div style={{ width: 18, height: 18, borderRadius: 99, border: '2px solid var(--indigo)', borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
+              </div>
+            )}
+          </button>
+        </div>
+
+        <p style={{ fontSize: 11, color: 'var(--ink-mute)', textAlign: 'center' }}>
+          Você pode alterar o tipo de plano a qualquer momento.
         </p>
       </div>
 
-      {/* Features */}
-      <div className="grid grid-cols-3 gap-4 text-center">
-        {[
-          { icon: <TrendingUp size={20} />, label: 'Dashboard em tempo real' },
-          { icon: <Target size={20} />, label: 'Metas com tracking' },
-          { icon: <Shield size={20} />, label: 'Dados seguros' },
-        ].map((f) => (
-          <div key={f.label} className="glass-card p-3 space-y-2">
-            <div className="text-emerald-400 flex justify-center">{f.icon}</div>
-            <p className="text-xs text-slate-400">{f.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Profile Cards */}
-      <div className="grid sm:grid-cols-2 gap-4 w-full">
-        <button
-          onClick={() => handleSelect('single')}
-          disabled={!!selecting}
-          className="glass-card p-6 text-left hover:border-emerald-500/50 hover:bg-slate-700/50 transition-all duration-200 active:scale-95 disabled:opacity-60 group"
-        >
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:bg-emerald-500/30 transition-colors">
-              👤
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold text-slate-100">Solteiro(a)</h3>
-              <p className="text-sm text-slate-400">Planejamento individual — controle total das suas finanças pessoais</p>
-              <div className="pt-2 space-y-1">
-                <FeatureBadge icon="✓" text="Orçamento pessoal" />
-                <FeatureBadge icon="✓" text="Metas individuais" />
-                <FeatureBadge icon="✓" text="Simulador de cenários" />
-              </div>
-            </div>
-          </div>
-          {selecting === 'single' && (
-            <div className="mt-4 flex justify-center">
-              <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-        </button>
-
-        <button
-          onClick={() => handleSelect('couple')}
-          disabled={!!selecting}
-          className="glass-card p-6 text-left hover:border-emerald-500/50 hover:bg-slate-700/50 transition-all duration-200 active:scale-95 disabled:opacity-60 group relative overflow-hidden"
-        >
-          <div className="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-            CASAL
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:bg-emerald-500/30 transition-colors">
-              👫
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold text-slate-100">Casal</h3>
-              <p className="text-sm text-slate-400">Planejamento a dois — visão conjunta e gestão colaborativa</p>
-              <div className="pt-2 space-y-1">
-                <FeatureBadge icon="✓" text="Finanças do casal" />
-                <FeatureBadge icon="✓" text="Divisão de despesas" />
-                <FeatureBadge icon="✓" text="Sync em tempo real" />
-              </div>
-            </div>
-          </div>
-          {selecting === 'couple' && (
-            <div className="mt-4 flex justify-center">
-              <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-        </button>
-      </div>
-
-      <p className="text-xs text-slate-600">
-        Você pode alterar o tipo de plano a qualquer momento. Seus dados ficam seguros.
-      </p>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   )
 }
