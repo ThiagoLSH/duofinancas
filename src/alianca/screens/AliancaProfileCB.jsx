@@ -6,7 +6,7 @@ import {
 import { AlIcon, AlSidebar } from '../components/AliancaShared';
 
 // ============ PROFILE / PERFIL ============
-const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userProp, plan: planProp, updateProfile, updateAuth, savePlan, tweaks = {} }) => {
+const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userProp, plan: planProp, cbConfig, updateProfile, updateAuth, savePlan, saveCBConfig, showToast, tweaks = {} }) => {
   const realName = profileProp?.full_name || userProp?.user_metadata?.full_name || PROFILE.full_name;
   const realEmail = userProp?.email || PROFILE.email;
 
@@ -19,6 +19,7 @@ const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userPr
   const [extraDesc, setExtraDesc] = React.useState(PROFILE.extra_income_description);
   const [showPassword, setShowPassword] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  const [vinculo, setVinculo] = React.useState(cbConfig?.tipo_vinculo || 'comunidade_alianca');
 
   React.useEffect(() => {
     if (profileProp?.full_name) setName(profileProp.full_name);
@@ -29,6 +30,9 @@ const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userPr
   React.useEffect(() => {
     if (planProp?.monthly_income) setIncome(planProp.monthly_income);
   }, [planProp?.monthly_income]);
+  React.useEffect(() => {
+    if (cbConfig?.tipo_vinculo) setVinculo(cbConfig.tipo_vinculo);
+  }, [cbConfig?.tipo_vinculo]);
 
   const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
 
@@ -37,6 +41,9 @@ const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userPr
     try {
       if (updateProfile) await updateProfile({ full_name: name });
       if (updateAuth) await updateAuth({ data: { full_name: name }, ...(email !== realEmail ? { email } : {}) });
+      showToast?.('Perfil atualizado com sucesso!');
+    } catch (err) {
+      showToast?.('Erro ao salvar perfil. Tente novamente.', 'error');
     } finally {
       setSaving(false);
     }
@@ -46,6 +53,22 @@ const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userPr
     setSaving(true);
     try {
       if (savePlan) await savePlan({ monthly_income: income });
+      else showToast?.('Renda atualizada!');
+    } catch (err) {
+      showToast?.('Erro ao salvar renda. Tente novamente.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveCommunity = async () => {
+    setSaving(true);
+    try {
+      const pct = vinculo === 'obra' ? 10 : 15;
+      if (saveCBConfig) await saveCBConfig({ tipo_vinculo: vinculo, percentual: pct });
+      else showToast?.('Vínculo atualizado!');
+    } catch (err) {
+      showToast?.('Erro ao salvar vínculo. Tente novamente.', 'error');
     } finally {
       setSaving(false);
     }
@@ -232,22 +255,32 @@ const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userPr
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {[
                     { id: 'oracao', label: 'Grupo de Oração', sub: '10% sobre a renda', pct: 10 },
-                    { id: 'alianca', label: 'Comunidade de Aliança', sub: '15% sobre a renda', pct: 15 },
+                    { id: 'comunidade_alianca', label: 'Comunidade de Aliança', sub: '15% sobre a renda', pct: 15 },
                     { id: 'vocacionado', label: 'Vocacionado(a)', sub: '15% — Obra integral', pct: 15 },
-                  ].map((v) => (
-                    <div key={v.id} style={{
-                      display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 10,
-                      border: '1px solid ' + (v.id === 'alianca' ? 'var(--indigo)' : 'var(--line)'),
-                      background: v.id === 'alianca' ? 'var(--indigo-soft)' : 'var(--paper)',
-                    }}>
-                      <div style={{ width: 18, height: 18, borderRadius: 99, border: '2px solid ' + (v.id === 'alianca' ? 'var(--indigo)' : 'var(--line-strong)'), background: v.id === 'alianca' ? 'var(--indigo)' : 'transparent', boxShadow: v.id === 'alianca' ? 'inset 0 0 0 3px var(--paper)' : 'none' }}></div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600 }}>{v.label}</div>
-                        <div style={{ fontSize: 11, color: 'var(--ink-mute)' }}>{v.sub}</div>
-                      </div>
-                      <div className="num" style={{ fontSize: 18, color: v.id === 'alianca' ? 'var(--indigo)' : 'var(--ink-mute)' }}>{v.pct}%</div>
-                    </div>
-                  ))}
+                    { id: 'obra', label: 'Membro da Obra', sub: '10% — Obra integral', pct: 10 },
+                  ].map((v) => {
+                    const active = vinculo === v.id;
+                    return (
+                      <button key={v.id} onClick={() => setVinculo(v.id)} style={{
+                        display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 10, cursor: 'pointer',
+                        border: '1px solid ' + (active ? 'var(--indigo)' : 'var(--line)'),
+                        background: active ? 'var(--indigo-soft)' : 'var(--paper)',
+                        textAlign: 'left', fontFamily: 'inherit', width: '100%',
+                      }}>
+                        <div style={{ width: 18, height: 18, borderRadius: 99, border: '2px solid ' + (active ? 'var(--indigo)' : 'var(--line-strong)'), background: active ? 'var(--indigo)' : 'transparent', boxShadow: active ? 'inset 0 0 0 3px var(--paper)' : 'none', flexShrink: 0 }}></div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: active ? 'var(--indigo)' : 'var(--ink)' }}>{v.label}</div>
+                          <div style={{ fontSize: 11, color: 'var(--ink-mute)' }}>{v.sub}</div>
+                        </div>
+                        <div className="num" style={{ fontSize: 18, color: active ? 'var(--indigo)' : 'var(--ink-mute)' }}>{v.pct}%</div>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
+                  <button className="btn btn-primary" onClick={handleSaveCommunity} disabled={saving}>
+                    {saving ? 'Salvando…' : 'Salvar vínculo'}
+                  </button>
                 </div>
               </div>
 
@@ -272,8 +305,8 @@ const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userPr
                     <input type="date" className="input" defaultValue="2018-12-08" style={{ marginTop: 6, fontFamily: 'inherit' }} />
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-                  <button className="btn btn-primary">Salvar</button>
+                <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: 'var(--bg-2)', fontSize: 11, color: 'var(--ink-mute)' }}>
+                  ℹ️ Esses dados são informativos. Use o card ao lado para alterar seu vínculo e percentual.
                 </div>
               </div>
             </div>

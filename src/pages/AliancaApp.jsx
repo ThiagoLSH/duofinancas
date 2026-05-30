@@ -33,11 +33,11 @@ const buildRecommendations = (freeBalance, incomeTotal, totalFixed, totalVar) =>
 
 export const AliancaApp = () => {
   const { user, profile, updateProfile, updateAuth } = useAuthContext()
-  const { plan, expenses } = useFinanceContext()
+  const { plan, expenses, showToast } = useFinanceContext()
   const { savePlan } = usePlan()
   const { loadExpenses, saveExpenses } = useExpenses()
   const { goals, loadGoals, createGoal, updateGoal, deleteGoal } = useGoals()
-  const { config, historico, addDevolucao } = useComunhaoBens()
+  const { config, historico, addDevolucao, saveConfig } = useComunhaoBens()
 
   const [activeScreen, setActiveScreen] = useState('home')
 
@@ -195,9 +195,12 @@ export const AliancaApp = () => {
         profile={profile}
         user={user}
         plan={plan}
+        cbConfig={config}
         updateProfile={updateProfile}
         updateAuth={updateAuth}
         savePlan={savePlan}
+        saveCBConfig={saveConfig}
+        showToast={showToast}
         {...shared}
       />
     ),
