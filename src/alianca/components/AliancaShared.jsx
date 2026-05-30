@@ -123,7 +123,7 @@ const AliancaDashboard = ({
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <div className="chip chip-success"><span style={{ width: 5, height: 5, borderRadius: 99, background: 'currentColor' }}></span>Sincronizado · agora</div>
-            <button className="btn btn-ghost">Exportar PDF</button>
+            <button className="btn btn-ghost" onClick={() => window.print()}>Exportar PDF</button>
             <button className="btn btn-primary" onClick={() => onNavigate?.('mov')}><AlIcon shape="plus" color="#fff" /> Lançamento</button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 // Auto-generated from prototype. Aliança UI kit for DuoFinanças.
 import React from 'react';
 import {
-  fmt, fmtCompact, INCOME_TOTAL, FIXED_EXPENSES, VARIABLE_EXPENSES, FREE_BALANCE, CB_VALUE, GOALS, WIZARD_STEPS, SCENARIOS
+  fmt, fmtCompact, INCOME_TOTAL, FIXED_EXPENSES, VARIABLE_EXPENSES, FREE_BALANCE, CB_VALUE, GOALS, WIZARD_STEPS
 } from '../mockData';
 import { AlIcon, AlSidebar } from '../components/AliancaShared';
 
@@ -14,6 +14,7 @@ const AliancaGoals = ({ initialGoals, onCreateGoal, onUpdateGoal, onDeleteGoal, 
   const [newCurrent, setNewCurrent] = React.useState('');
   const [newDate, setNewDate] = React.useState('');
   const [newIcon, setNewIcon] = React.useState('🎯');
+  const [depositMap, setDepositMap] = React.useState({});
 
   // Use real goals if provided, otherwise fall back to mock
   const baseGoals = initialGoals && initialGoals.length > 0
@@ -52,7 +53,7 @@ const AliancaGoals = ({ initialGoals, onCreateGoal, onUpdateGoal, onDeleteGoal, 
             <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', marginTop: 2 }}>Metas financeiras</div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-ghost">Exportar resumo</button>
+            <button className="btn btn-ghost" onClick={() => window.print()}>Exportar resumo</button>
             <button className="btn btn-primary" onClick={() => setShowNew(true)}><AlIcon shape="plus" color="#fff" /> Nova meta</button>
           </div>
         </div>
@@ -148,19 +149,42 @@ const AliancaGoals = ({ initialGoals, onCreateGoal, onUpdateGoal, onDeleteGoal, 
                           <label style={{ fontSize: 10, color: 'var(--ink-mute)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>Adicionar guardado</label>
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4, padding: '6px 10px', border: '1px solid var(--line-strong)', borderRadius: 8 }}>
                             <span style={{ fontSize: 11, color: 'var(--ink-mute)' }}>R$</span>
-                            <input placeholder="0,00" className="num" style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 14 }} />
+                            <input
+                              placeholder="0,00"
+                              className="num"
+                              value={depositMap[g.id] || ''}
+                              onChange={(e) => setDepositMap(prev => ({ ...prev, [g.id]: e.target.value.replace(/\D/g, '') }))}
+                              style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 14 }} />
                           </div>
                         </div>
-                        <button className="btn btn-primary" style={{ marginTop: 16, padding: '8px 12px', fontSize: 11 }}>+ Guardar</button>
+                        <button className="btn btn-primary" style={{ marginTop: 16, padding: '8px 12px', fontSize: 11 }} onClick={async () => {
+                          const amount = Number(depositMap[g.id]) || 0;
+                          if (!amount) return;
+                          const newCurrent = Math.min(g.current + amount, g.target);
+                          const newStatus = newCurrent >= g.target ? 'completed' : g.status;
+                          await onUpdateGoal?.(g.id, { current_value: newCurrent, status: newStatus });
+                          setLocalGoals(prev => prev.map(x => x.id === g.id ? { ...x, current: newCurrent, status: newStatus } : x));
+                          setDepositMap(prev => ({ ...prev, [g.id]: '' }));
+                        }}>+ Guardar</button>
                       </div>
                       <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
                         {isPaused ? (
-                          <button className="btn btn-ghost" style={{ fontSize: 10, padding: '5px 10px' }}>▶ Retomar</button>
+                          <button className="btn btn-ghost" style={{ fontSize: 10, padding: '5px 10px' }} onClick={async () => {
+                            await onUpdateGoal?.(g.id, { status: 'active' });
+                            setLocalGoals(prev => prev.map(x => x.id === g.id ? { ...x, status: 'active' } : x));
+                          }}>▶ Retomar</button>
                         ) : (
-                          <button className="btn btn-ghost" style={{ fontSize: 10, padding: '5px 10px' }}>⏸ Pausar</button>
+                          <button className="btn btn-ghost" style={{ fontSize: 10, padding: '5px 10px' }} onClick={async () => {
+                            await onUpdateGoal?.(g.id, { status: 'paused' });
+                            setLocalGoals(prev => prev.map(x => x.id === g.id ? { ...x, status: 'paused' } : x));
+                          }}>⏸ Pausar</button>
                         )}
                         <button className="btn btn-ghost" style={{ fontSize: 10, padding: '5px 10px' }}>✏️ Editar</button>
-                        <button className="btn btn-ghost" style={{ fontSize: 10, padding: '5px 10px', marginLeft: 'auto', color: 'var(--red)' }}>Excluir</button>
+                        <button className="btn btn-ghost" style={{ fontSize: 10, padding: '5px 10px', marginLeft: 'auto', color: 'var(--red)' }} onClick={async () => {
+                          if (!window.confirm('Excluir esta meta?')) return;
+                          await onDeleteGoal?.(g.id);
+                          setLocalGoals(prev => prev.filter(x => x.id !== g.id));
+                        }}>Excluir</button>
                       </div>
                     </React.Fragment>
                   )}
@@ -238,6 +262,10 @@ const AliancaSimulator = ({
   const [adjustments, setAdjustments] = React.useState({});
   const [extraSavings, setExtraSavings] = React.useState(500);
   const [scenarioName, setScenarioName] = React.useState('Cortar delivery + Uber');
+  const [savedScenarios, setSavedScenarios] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem('df_scenarios') || '[]'); } catch { return []; }
+  });
+  const [scenarioNotes, setScenarioNotes] = React.useState('');
 
   const adjustedExpenses = allExpenses.map((e) => ({ ...e, amount: adjustments[e.id] ?? e.amount }));
   const origTotal = allExpenses.reduce((s, e) => s + e.amount, 0);
@@ -365,12 +393,19 @@ const AliancaSimulator = ({
               <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>Salvar como cenário</div>
               <div style={{ fontSize: 11, color: 'var(--ink-mute)', marginBottom: 12 }}>Volte depois para revisitar esta simulação.</div>
               <input className="input" value={scenarioName} onChange={(e) => setScenarioName(e.target.value)} placeholder="Nome do cenário" />
-              <textarea className="input" placeholder="Observações…" style={{ marginTop: 8, resize: 'none', height: 60, fontFamily: 'inherit' }}></textarea>
-              <button className="btn btn-primary" style={{ marginTop: 10, width: '100%', justifyContent: 'center' }}>💾 Salvar cenário</button>
+              <textarea className="input" value={scenarioNotes} onChange={(e) => setScenarioNotes(e.target.value)} placeholder="Observações…" style={{ marginTop: 8, resize: 'none', height: 60, fontFamily: 'inherit' }}></textarea>
+              <button className="btn btn-primary" style={{ marginTop: 10, width: '100%', justifyContent: 'center' }} onClick={() => {
+                if (!scenarioName.trim()) return;
+                const s = { id: Date.now(), name: scenarioName, notes: scenarioNotes, delta, adjustments: { ...adjustments }, extraSavings };
+                const updated = [s, ...savedScenarios].slice(0, 10);
+                setSavedScenarios(updated);
+                localStorage.setItem('df_scenarios', JSON.stringify(updated));
+                setScenarioName(''); setScenarioNotes('');
+              }}>💾 Salvar cenário</button>
 
               <div style={{ marginTop: 16 }}>
                 <div style={{ fontSize: 10, color: 'var(--ink-mute)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600, marginBottom: 8 }}>Cenários salvos</div>
-                {SCENARIOS.map((s) => (
+                {savedScenarios.map((s) => (
                   <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8, background: 'var(--bg-2)', marginBottom: 6 }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 12, fontWeight: 600 }}>{s.name}</div>
@@ -432,7 +467,7 @@ const AliancaAnamnesis = ({ onBack, onNext, plan: planProp, profile: profileProp
             </React.Fragment>
           ))}
         </div>
-        <button className="btn btn-ghost">Salvar e sair</button>
+        <button className="btn btn-ghost" onClick={async () => { await savePlan?.({ unified_finances: unified, shared_expense_percentage: sharedPct, main_goal: mainGoal }); onBack?.(); }}>Salvar e sair</button>
       </header>
 
       <div style={{ flex: 1, overflowY: 'auto' }}>

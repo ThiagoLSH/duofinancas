@@ -149,6 +149,11 @@ export const AuthProvider = ({ children }) => {
     return supabase.auth.signInWithOtp({ email })
   }
 
+  const resetPassword = async (email) => {
+    if (isDemo) return { data: null, error: { message: 'Reset de senha não disponível no modo demo' } }
+    return supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin })
+  }
+
   const signInWithGoogle = async () => {
     if (isDemo) return { data: null, error: { message: 'Google OAuth não disponível no modo demo' } }
     return supabase.auth.signInWithOAuth({
@@ -218,7 +223,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       user, profile, loading, isDemo,
       signInWithEmail, signUpWithEmail,
-      signInWithMagicLink, signInWithGoogle,
+      signInWithMagicLink, signInWithGoogle, resetPassword,
       signOut, updateProfile, updateAuth, uploadAvatar, fetchProfile,
     }}>
       {children}

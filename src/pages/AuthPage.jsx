@@ -4,7 +4,7 @@ import { useAuthContext } from '../context/AuthContext'
 
 export const AuthPage = () => {
   const [mode, setMode] = useState('login')
-  const { signInWithEmail, signUpWithEmail, signInWithMagicLink, signInWithGoogle, isDemo } = useAuthContext()
+  const { signInWithEmail, signUpWithEmail, signInWithMagicLink, signInWithGoogle, resetPassword, isDemo } = useAuthContext()
 
   if (mode === 'signup') {
     return (
@@ -22,6 +22,7 @@ export const AuthPage = () => {
       signInWithEmail={signInWithEmail}
       signInWithMagicLink={signInWithMagicLink}
       signInWithGoogle={signInWithGoogle}
+      resetPassword={resetPassword}
       isDemo={isDemo}
     />
   )

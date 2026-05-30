@@ -60,7 +60,7 @@ const AliancaProfile = ({ onNavigate, couple, profile: profileProp, user: userPr
             <div style={{ fontSize: 11, color: 'var(--ink-mute)' }}>Conta</div>
             <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: '-0.02em', marginTop: 2 }}>Editar perfil</div>
           </div>
-          <button className="btn btn-ghost">Cancelar</button>
+          <button className="btn btn-ghost" onClick={() => onNavigate?.('home')}>Cancelar</button>
         </div>
 
         <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1, maxWidth: 880, margin: '0 auto', width: '100%' }}>

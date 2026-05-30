@@ -20,11 +20,33 @@ const AliancaCBModule = ({
   const streakVal = streakProp != null ? streakProp : STREAK;
   const [renda, setRenda] = React.useState(incomeProp || 9800);
   const [vinculo, setVinculo] = React.useState(cbConfig?.tipo_vinculo === 'comunidade_alianca' ? 'alianca' : 'alianca');
+  const [showRegistro, setShowRegistro] = React.useState(false);
+  const [regMes, setRegMes] = React.useState(new Date().toISOString().slice(0, 7));
+  const [regValor, setRegValor] = React.useState('');
+  const [regSaving, setRegSaving] = React.useState(false);
+  const [showPix, setShowPix] = React.useState(false);
   const pct = vinculo === 'alianca' ? 0.15 : 0.10;
   const valor = renda * pct;
   const obra = renda * 0.10;
   const nec = renda * 0.05;
   const totalDevolvido = cbHist.reduce((s, h) => s + (h.amount || 0), 0);
+
+  const handleRegistrar = async () => {
+    const v = Number(regValor.replace(/\D/g, '')) || 0;
+    if (!v) return;
+    setRegSaving(true);
+    await onRegisterDevolucao?.({
+      mes_referencia: regMes,
+      valor_renda: renda,
+      percentual_aplicado: pct * 100,
+      valor_devolvido: v,
+      status: 'devolvido',
+      forma_devolucao: 'pix',
+    });
+    setRegValor('');
+    setShowRegistro(false);
+    setRegSaving(false);
+  };
 
   return (
     <div className="alianca-root" style={{ display: 'flex' }}>
@@ -37,7 +59,7 @@ const AliancaCBModule = ({
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <div className="chip chip-amber"><AlIcon shape="dove" size={12} /> Comunidade de Aliança · {(pct * 100).toFixed(0)}%</div>
-            <button className="btn btn-ghost">Configurar lembrete</button>
+            <button className="btn btn-ghost" onClick={() => onNavigate?.('profile')}>Configurar lembrete</button>
           </div>
         </div>
 
@@ -107,9 +129,21 @@ const AliancaCBModule = ({
                   </div>
                 )}
               </div>
-              <button className="btn" style={{ marginTop: 16, background: '#fff', color: 'var(--indigo)', justifyContent: 'center', width: '100%' }}>
-                Gerar QR Code PIX  <AlIcon shape="arrow" color="var(--indigo)" />
+              <button className="btn" style={{ marginTop: 16, background: '#fff', color: 'var(--indigo)', justifyContent: 'center', width: '100%' }}
+                onClick={() => setShowPix(v => !v)}>
+                {showPix ? 'Fechar PIX' : 'Gerar QR Code PIX'}  <AlIcon shape="arrow" color="var(--indigo)" />
               </button>
+              {showPix && (
+                <div style={{ marginTop: 12, padding: 16, borderRadius: 12, background: 'rgba(255,255,255,0.1)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: '#C0C0F0', marginBottom: 8 }}>Chave PIX · Obra Shalom</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', fontFamily: 'monospace', wordBreak: 'break-all' }}>comunidade@shalom.com.br</div>
+                  <div style={{ fontSize: 11, color: '#A8A8E0', marginTop: 6 }}>Valor sugerido: <span style={{ color: '#fff', fontWeight: 700 }}>{fmt(valor)}</span></div>
+                  <button className="btn" style={{ marginTop: 10, background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 11, width: '100%', justifyContent: 'center' }}
+                    onClick={() => { navigator.clipboard?.writeText('comunidade@shalom.com.br'); }}>
+                    📋 Copiar chave PIX
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -169,7 +203,30 @@ const AliancaCBModule = ({
                   </div>
                 ))}
               </div>
-              <button className="btn btn-ghost" style={{ marginTop: 10, justifyContent: 'center' }}>+ Adicionar registro</button>
+              <button className="btn btn-ghost" style={{ marginTop: 10, justifyContent: 'center' }} onClick={() => setShowRegistro(v => !v)}>
+                {showRegistro ? 'Cancelar' : '+ Adicionar registro'}
+              </button>
+              {showRegistro && (
+                <div style={{ marginTop: 12, padding: 14, borderRadius: 10, background: 'var(--indigo-soft)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-soft)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mês de referência</label>
+                    <input type="month" value={regMes} onChange={e => setRegMes(e.target.value)}
+                      className="input" style={{ marginTop: 4, fontFamily: 'inherit' }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-soft)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Valor devolvido</label>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4, padding: '8px 12px', border: '1px solid var(--line-strong)', borderRadius: 8, background: 'var(--paper)' }}>
+                      <span style={{ fontSize: 12, color: 'var(--ink-mute)' }}>R$</span>
+                      <input value={regValor} onChange={e => setRegValor(e.target.value.replace(/\D/g, ''))}
+                        placeholder={Math.round(valor).toString()} className="num"
+                        style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 16 }} />
+                    </div>
+                  </div>
+                  <button className="btn btn-primary" style={{ justifyContent: 'center' }} disabled={regSaving} onClick={handleRegistrar}>
+                    {regSaving ? 'Registrando…' : '✓ Confirmar devolução'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

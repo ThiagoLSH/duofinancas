@@ -113,11 +113,12 @@ const DemoBanner = () => (
 );
 
 // ─────────── LOGIN ───────────
-const AliancaLogin = ({ onSignup, signInWithEmail, signInWithMagicLink, signInWithGoogle, isDemo, tweaks = {} }) => {
+const AliancaLogin = ({ onSignup, signInWithEmail, signInWithMagicLink, signInWithGoogle, resetPassword, isDemo, tweaks = {} }) => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [showPw, setShowPw] = React.useState(false);
   const [magicSent, setMagicSent] = React.useState(false);
+  const [resetSent, setResetSent] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
 
@@ -149,7 +150,7 @@ const AliancaLogin = ({ onSignup, signInWithEmail, signInWithMagicLink, signInWi
       <div style={{ width: 520, background: 'var(--bg)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--line)' }}>
           <div className="chip">Acesso seguro · Supabase</div>
-          <a style={{ fontSize: 12, color: 'var(--ink-mute)', cursor: 'pointer' }}>← Voltar para o site</a>
+          <a href="/lp" style={{ fontSize: 12, color: 'var(--ink-mute)', cursor: 'pointer', textDecoration: 'none' }}>← Voltar para o site</a>
         </div>
 
         <div style={{ flex: 1, padding: '48px 40px', display: 'flex', flexDirection: 'column', gap: 0, overflow: 'auto' }}>
@@ -162,7 +163,7 @@ const AliancaLogin = ({ onSignup, signInWithEmail, signInWithMagicLink, signInWi
                 e clique no link para entrar. Pode levar até <span className="num">2 min</span>.
               </div>
               <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <button className="btn btn-primary" style={{ justifyContent: 'center' }}>Abrir email</button>
+                <button className="btn btn-primary" style={{ justifyContent: 'center' }} onClick={() => window.open('mailto:', '_blank')}>Abrir email</button>
                 <button onClick={() => setMagicSent(false)} className="btn btn-ghost" style={{ justifyContent: 'center' }}>← Tentar de novo</button>
               </div>
             </div>
@@ -185,7 +186,16 @@ const AliancaLogin = ({ onSignup, signInWithEmail, signInWithMagicLink, signInWi
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-soft)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Senha</label>
-                    <a style={{ fontSize: 11, color: 'var(--indigo)', cursor: 'pointer', fontWeight: 500 }}>Esqueci minha senha</a>
+                    <a onClick={async () => {
+                      if (!email) { setError('Digite seu email acima primeiro.'); return; }
+                      setError(''); setLoading(true);
+                      const { error: err } = await resetPassword?.(email) || {};
+                      if (err) setError(err.message);
+                      else setResetSent(true);
+                      setLoading(false);
+                    }} style={{ fontSize: 11, color: 'var(--indigo)', cursor: 'pointer', fontWeight: 500 }}>
+                      {resetSent ? '✓ Email enviado' : 'Esqueci minha senha'}
+                    </a>
                   </div>
                   <div style={{ marginTop: 6 }}>
                     <InputWithIcon icon="🔒" type={showPw ? 'text' : 'password'} placeholder="••••••••"
